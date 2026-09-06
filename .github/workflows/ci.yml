@@ -42,28 +42,32 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
           retention-days: 14
+
       - name: Notifier le début du build
         run: curl -X POST "$NOTIFY_WEBHOOK_URL" -d '{"status":"build started"}'
         env:
           NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
-        compatibility-check:
-          strategy:
-            matrix:
-              java: [ 17, 21 ]
-          runs-on: ubuntu-latest
-          steps:
-            - uses: actions/checkout@v4
 
-            - uses: actions/setup-java@v4
-              with:
-                distribution: temurin
-                java-version: ${{ matrix.java }}
-                cache: maven
-
-            - run: mvn -B test
       - name: Étape non bloquante (ex. linter optionnel)
         run: mvn -B checkstyle:check
         continue-on-error: true
+
       - name: Alerter uniquement si le job précédent a échoué
         if: ${{ failure() }}
         run: echo "Le build a échoué, une alerte serait envoyée ici."
+
+  compatibility-check:
+    strategy:
+      matrix:
+        java: [ 17, 21 ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - run: mvn -B test
