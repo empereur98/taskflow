@@ -40,11 +40,6 @@ jobs:
           path: target/site/jacoco/
           retention-days: 14
 
-      - name: Notifier le début du build
-        run: curl -X POST "$NOTIFY_WEBHOOK_URL" -d '{"status":"build started"}'
-        env:
-          NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
-
       - name: Étape non bloquante (ex. linter optionnel)
         run: mvn -B checkstyle:check
         continue-on-error: true
