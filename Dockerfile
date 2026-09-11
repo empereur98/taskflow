@@ -15,6 +15,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/*.jar app.jar
+COPY .trivyignore /tmp/.trivyignore
 EXPOSE 8080
 
 # Create non-root user
