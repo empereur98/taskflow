@@ -7,6 +7,7 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - dependencies
+      - allow: dependency-updates  # ← Important : autorise les mises à jour
 
   - package-ecosystem: github-actions
     directory: /
