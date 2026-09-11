@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Upgrade OpenSSL to fix CVE-2026-14456 (requires 3.5.8+)
 RUN apt-get update && \
-    apt-get install -y --only-upgrade openssl libssl3 && \
+    apt-get install -y --only-upgrade openssl libssl3 adduser && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/*.jar app.jar
