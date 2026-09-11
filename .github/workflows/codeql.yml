@@ -30,13 +30,14 @@ jobs:
   secret-scan:
     name: Secret Detection (Gitleaks)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Historique complet nécessaire à Gitleaks
 
       - name: Gitleaks scan
-
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
