@@ -6,8 +6,14 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 WORKDIR /app
+
+# Upgrade OpenSSL to fix CVE-2026-14456 (requires 3.5.8+)
+RUN apt-get update && \
+    apt-get install -y --only-upgrade openssl libssl3 && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
