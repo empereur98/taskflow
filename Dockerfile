@@ -18,7 +18,8 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Create non-root user
-RUN addgroup -S appgroup && adduser -S -G appgroup -s /sbin/nologin -D appuser
+# Créer un utilisateur non-root
+RUN groupadd -r appgroup && useradd -r -g appgroup -s /sbin/nologin -d /nonexistent appuser
 RUN chown -R appuser:appgroup /app
 USER appuser
 
