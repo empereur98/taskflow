@@ -6,20 +6,18 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * 1" # Scan complet hebdomadaire (lundi à 03h00 UTC)
 
 permissions:
   contents: read
   security-events: write
+  pull-requests: read
   actions: read
 
 jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -36,10 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Historique complet nécessaire à Gitleaks
 
       - name: Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
@@ -52,9 +51,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run build and tests
-        run: |
-          echo "Build and test steps..."
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+      - name: Build (compile)
+        run: mvn -B compile -DskipTests
+      - name: Unit tests
+        run: mvn -B test
+      - name: Integration tests
+        run: mvn -B verify -Pintegration
 
   container-scan:
     name: Container Vulnerability Scan (Trivy)
@@ -70,17 +78,17 @@ jobs:
         run: docker build -t taskflow:${{ github.sha }} .
 
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: taskflow:${{ github.sha }}
           format: sarif
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
-          exit-code: "0"
+          exit-code: "1"
+          ignore-file: /tmp/.trivyignore
 
-      - name: Upload Trivy results
+      - name: Upload Trivy results to Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
-          category: trivy
