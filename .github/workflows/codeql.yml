@@ -50,6 +50,7 @@ jobs:
 
   build-and-test:
     name: Build & Test
+    needs: secret-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
