@@ -100,6 +100,16 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "0" # bloque le pipeline si trouvé
           trivyignores: .trivyignore
+          scan-type: image
+      - name: Upload Trivy results as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: trivy-scan-results
+            path: |
+              trivy-results.json
+              trivy-results.sarif
+            retention-days: 14
       - name: Upload Trivy results to Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
