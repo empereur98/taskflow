@@ -4,10 +4,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
     open-pull-requests-limit: 5
-    labels:
-      - dependencies
-      - allow: dependency-updates  # ← Important : autorise les mises à jour
+    labels: [ "dependencies" ]
 
   - package-ecosystem: github-actions
     directory: /
