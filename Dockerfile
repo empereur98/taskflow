@@ -9,9 +9,9 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Upgrade OpenSSL to fix CVE-2026-14456 (requires 3.5.8+)
+# Mettre à jour tous les paquets de l'image de base
 RUN apt-get update && \
-    apt-get install -y --only-upgrade openssl libssl3 adduser && \
+    apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/*.jar app.jar
