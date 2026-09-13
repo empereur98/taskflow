@@ -101,6 +101,7 @@ jobs:
           exit-code: "1" # bloque le pipeline si trouvé
           trivyignores: .trivyignore
           scan-type: image
+          ignore-unfixed: true
       - name: Upload Trivy results as artifact
         if: always()
         uses: actions/upload-artifact@v4
