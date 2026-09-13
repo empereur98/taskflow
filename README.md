@@ -26,7 +26,7 @@ This is a spring boot application for a demo
 1. Fork the repository
 2. Create a new branch
 3. Make your changes
-4. Submit a pull request
+4. Submit a pull requestn
 
 ## License
 
