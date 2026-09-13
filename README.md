@@ -30,4 +30,4 @@ This is a spring boot application for a demo
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+new This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
