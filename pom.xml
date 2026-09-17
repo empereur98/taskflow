@@ -62,6 +62,14 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Dépendances obsolètes pour tester Dependabot -->
+
+
+
+
+
+
+
     </dependencies>
 
     <build>
