@@ -36,9 +36,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/${{ steps.repo.outputs.NAME }}:sha-${{ github.event.workflow_run.head_sha }}
-            ghcr.io/${{ steps.repo.outputs.NAME }}:latest
+          outputs: |
+            type=image,push=true
+            name=ghcr.io/${{ steps.repo.outputs.NAME }}:sha-${{ github.event.workflow_run.head_sha }}
+            name=ghcr.io/${{ steps.repo.outputs.NAME }}:latest
 
   deploy-test:
     needs: publish
