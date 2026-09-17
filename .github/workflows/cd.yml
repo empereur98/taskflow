@@ -1,0 +1,73 @@
+name: CD - Publish & Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Normalize repository name to lowercase
+        id: repo
+        run: echo "NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          outputs: |
+            type=image,push=true
+            name=ghcr.io/${{ steps.repo.outputs.NAME }}:sha-${{ github.event.workflow_run.head_sha }}
+            name=ghcr.io/${{ steps.repo.outputs.NAME }}:latest
+
+  deploy-test:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+      url: https://taskflow-api-test.onrender.com
+    steps:
+      - name: Normalize repository name to lowercase
+        id: repo
+        run: echo "NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger deployment on Render
+        run: |
+          IMAGE_TAG="ghcr.io/${{ steps.repo.outputs.NAME }}:sha-${{ github.event.workflow_run.head_sha }}"
+
+          curl --fail -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d "{\"imageUrl\": \"$IMAGE_TAG\"}"
+
+      - name: Smoke test (Healthcheck)
+        run: |
+          echo "Vérification de la disponibilité du service..."
+          curl --fail \
+            --retry 25 \
+            --retry-delay 5 \
+            --retry-all-errors \
+            --retry-connrefused \
+            https://taskflow-api-test.onrender.com/actuator/health
